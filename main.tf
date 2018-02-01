@@ -49,8 +49,9 @@ resource "aws_security_group" "elb" {
     protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
 }
+
+data "aws_availability_zones" "all" {}
 
 resource "aws_autoscaling_group" "example" {
   launch_configuration = "${aws_launch_configuration.example.id}"
@@ -88,14 +89,3 @@ resource "aws_elb" "example" {
     target = "HTTP:${var.server_port}/"
   }
 }
-
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  default = 8080
- }
-
- output "elb_dns_name" {
-    value = "${aws_elb.example.dns_name}"
- }
-
- data "aws_availability_zones" "all" {}
