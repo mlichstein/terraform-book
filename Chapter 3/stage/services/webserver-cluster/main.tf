@@ -6,6 +6,16 @@ terraform {
   backend "s3" {}
 }
 
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config {
+    bucket = "mlichstein-terraform-state"
+    key = "stage/data-stores/mysql/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 resource "aws_launch_configuration" "example" {
    image_id = "ami-40d28157"
    instance_type = "t2.micro"
@@ -13,7 +23,9 @@ resource "aws_launch_configuration" "example" {
 
    user_data = <<-EOF
                #!/bin/bash
-               echo "Hello, World!" > index.html
+               echo "Hello, World!" >> index.html
+               echo "${data.terraform_remote_state.db.address}" >> index.html
+               echo "${data.terraform_remote_state.db.port}" >> index.html
                nohup busybox httpd -f -p "${var.server_port}" &
                EOF
   
